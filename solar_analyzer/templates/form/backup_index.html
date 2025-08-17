@@ -1,0 +1,248 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}My Django Site{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Optional: Your custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="bg-light">
+
+    <div class="container py-5">
+        <div class="text-center mb-4">
+            <h1 class="display-5">☀️ Solar Analyzer Project</h1>
+            <p class="lead">Welcome, <strong>{{ request.user.username }}</strong></p>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3 mb-4">
+            {% comment %} <a href="{% url 'protected' %}" class="btn btn-outline-secondary">🔒 Protected Page</a> {% endcomment %}
+
+            <form action="{% url 'logout' %}" method="POST" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">🚪 Logout</button>
+            </form>
+
+            <form action="{% url 'solar_form_view' %}" method="get" class="d-inline">
+                <button type="submit" class="btn btn-primary">➕ Add New Region</button>
+            </form>
+
+            <a href="{% url 'solar_step1'%}" class="btn btn-info">➕ Fill Solar Info for ROI</a>
+
+        </div>
+
+
+
+
+        <hr class="my-5">
+
+<h2 class="text-center mb-3">📊 User Solar ROI Data</h2>
+
+{% if solar_data %}
+<div class="table-responsive shadow-sm">
+    <table class="table table-bordered table-hover align-middle">
+        <thead class="table-primary text-center">
+            <tr>
+                <th>#</th>
+                <th>User</th>
+                <th>Region</th>
+                <th>Usage Type</th>
+                <th>Energy Usage (kWh)</th>
+                <th>System Size (kW)</th>
+                <th>Sunlight Hours</th>
+                <th>Cost (MMK)</th>
+                <th>Incentives</th>
+                <th>Lifespan (yrs)</th>
+                <th>Payback (yrs)</th>
+                <th>ROI (%)</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for data in solar_data %}
+            <tr class="text-center">
+                <td>{{ forloop.counter }}</td>
+                <td>{{ data.user.username|default:"Guest" }}</td>
+                <td>{{ data.region.name }}</td>
+                <td>{{ data.usage_type|title }}</td>
+                <td>{{ data.energy_usage }}</td>
+                <td>{{ data.system_size }}</td>
+                <td>{{ data.sunlight_hours }}</td>
+                <td>{{ data.system_cost }}</td>
+                <td>{{ data.incentives }}</td>
+                <td>{{ data.lifespan }}</td>
+                <td>
+                    {% if data.payback_period %}
+                        {{ data.payback_period|floatformat:1 }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>
+                    {% if data.roi_percent %}
+                        {{ data.roi_percent|floatformat:1 }}%
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'solar_result_detail' data.id%}" class="btn btn-sm btn-outline-primary">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+    <p class="text-muted text-center mt-3">No solar ROI data submitted yet.</p>
+{% endif %}
+
+<br/>
+
+<!-- Leaflet CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Map Container -->
+<div id="regionMap" style="height: 400px;" class="my-4 shadow-sm rounded-4"></div>
+
+<!-- Leaflet Script -->
+<script>
+  const map = L.map('regionMap').setView([21.0, 96.0], 6); // Center of Myanmar
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  {% for region in regions %}
+    L.marker([{{ region.latitude }}, {{ region.longitude }}])
+      .addTo(map)
+      .bindPopup("<b>{{ region.name }}</b><br>☀️ {{ region.sunlight_hours }} hrs/day<br>💡 {{ region.electricity_rate }} MMK/kWh");
+  {% endfor %}
+</script>
+
+<!-- Chart Container -->
+<div class="card mt-5 p-4 shadow-sm" style="height: 500px;">
+    <h5 class="text-center">Region-wise Sunlight Hours & Electricity Rate</h5>
+    <canvas id="regionChart"></canvas>
+  </div>  
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Dynamic Chart Script -->
+  <script>
+    const ctx = document.getElementById('regionChart').getContext('2d');
+  
+    const regionData = {
+      labels: [{% for region in regions %}"{{ region.name }}"{% if not forloop.last %}, {% endif %}{% endfor %}],
+      datasets: [
+        {
+          label: 'Sunlight Hours (hrs/day)',
+          backgroundColor: 'rgba(255, 206, 86, 0.7)',
+          borderColor: 'rgba(255, 206, 86, 1)',
+          data: [{% for region in regions %}{{ region.sunlight_hours }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+        },
+        {
+          label: 'Electricity Rate (MMK/kWh)',
+          backgroundColor: 'rgba(54, 162, 235, 0.7)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          data: [{% for region in regions %}{{ region.electricity_rate }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+        }
+      ]
+    };
+  
+    const config = {
+      type: 'bar',
+      data: regionData,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
+        plugins: {
+          tooltip: {
+            mode: 'index',
+            intersect: false
+          },
+          legend: {
+            position: 'top'
+          },
+        },
+        scales: {
+          x: {
+            ticks: {
+              autoSkip: false,
+              maxRotation: 45,
+              minRotation: 30,
+              callback: function(value) {
+                let label = this.getLabelForValue(value);
+                return label.length > 15 ? label.slice(0, 15) + '…' : label; // shorten long names
+              }
+            }
+          },
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Values'
+            }
+          }
+        }
+      }
+    };
+  
+    new Chart(ctx, config);
+  </script>
+  
+  
+<br/>
+{% if regions %}
+<div class="table-responsive shadow-sm">
+    <table class="table table-bordered table-hover align-middle">
+        <thead class="table-dark text-center">
+            <tr>
+                <th>#</th>
+                <th>Region Name</th>
+                <th>Sunlight Hours (hrs/day)</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Electricity Rate (MMK/kWh)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for region in regions %}
+            <tr class="text-center">
+                <td>{{ forloop.counter }}</td>
+                <td>{{ region.name }}</td>
+                <td>{{ region.sunlight_hours }}</td>
+                <td>{{ region.latitude}}</td>
+                <td>{{ region.longitude }}</td>
+                <td>{{ region.electricity_rate }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+    <p class="text-muted text-center mt-3">No regions available yet.</p>
+{% endif %}
+
+
+        <div class="mt-5 text-center">
+            <img src="{% static 'images/logo.webp' %}" alt="Logo" class="img-fluid" style="max-width: 300px;">
+        </div>
+    </div>
+
+    <!-- Optional: Bootstrap JS -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
+
+</body>
+</html>

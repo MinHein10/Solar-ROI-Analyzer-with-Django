@@ -1,0 +1,178 @@
+{% extends 'form/base.html' %}
+
+{% block title %}Dashboard - Solar Analyzer{% endblock %}
+
+{% block content %}
+
+  <div class="container py-5">
+
+    <!-- Header -->
+    <div class="text-center mb-5">
+      <h1 class="display-5 fw-bold">☀️ Solar Analyzer Project</h1>
+      <p class="lead">Welcome, <strong>{{ request.user.username }}</strong></p>
+    </div>
+
+    <!-- Top Action Buttons -->
+    <div class="d-flex flex-wrap justify-content-center gap-3 mb-4">
+      {% comment %} <form action="{% url 'logout' %}" method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">🚪 Logout</button>
+      </form> {% endcomment %}
+      {% comment %} <form action="{% url 'solar_form_view' %}" method="get">
+        <button type="submit" class="btn btn-primary">➕ Add New Region</button>
+      </form> {% endcomment %}
+      <a href="{% url 'solar_step1' %}" class="btn btn-info">➕ Fill Solar Info For Getting Your ROI</a>
+    </div>
+
+    <hr class="my-5">
+
+
+    <!-- 📈 Visual Charts Section -->
+<h3 class="text-center mt-5 mb-3">📊 ROI Visual Analysis</h3>
+
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title text-center">ROI % by Region</h5>
+        <canvas id="roiChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title text-center">Payback Period by Region</h5>
+        <canvas id="paybackChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title text-center">System Cost (MMK) by Region</h5>
+        <canvas id="costChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+<hr/>
+
+    <!-- ROI Data Table -->
+    <h2 class="text-center mb-4">📊 User Solar ROI Data</h2>
+    {% if solar_data %}
+    <div class="card shadow-sm mb-5">
+      <div class="card-body table-responsive">
+        <table class="table table-hover table-bordered align-middle mb-0">
+          <thead class="table-primary text-center">
+            <tr>
+              <th>#</th>
+              <th>User</th>
+              <th>Region</th>
+              <th>Usage</th>
+              <th>Energy (kWh)</th>
+              <th>System (kW)</th>
+              <th>Sunlight</th>
+              <th>Cost (MMK)</th>
+              <th>Incentives</th>
+              <th>Lifespan</th>
+              <th>Payback</th>
+              <th>ROI</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for data in solar_data %}
+            <tr class="text-center">
+              <td>{{ forloop.counter }}</td>
+              <td>{{ data.user.username|default:"Guest" }}</td>
+              <td>{{ data.region.name }}</td>
+              <td>{{ data.usage_type|title }}</td>
+              <td>{{ data.energy_usage }}</td>
+              <td>{{ data.system_size }}</td>
+              <td>{{ data.sunlight_hours }}</td>
+              <td>{{ data.system_cost }}</td>
+              <td>{{ data.incentives }}</td>
+              <td>{{ data.lifespan }}</td>
+              <td>{{ data.payback_period|default:"N/A"|floatformat:1 }}</td>
+              <td>{{ data.roi_percent|default:"N/A"|floatformat:1 }}%</td>
+              <td>
+                <a href="{% url 'solar_result_detail' data.id %}" class="btn btn-sm btn-outline-primary">View</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% else %}
+    <p class="text-muted text-center mt-3">No solar ROI data submitted yet.</p>
+    {% endif %}
+
+
+  </div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const labels = {{ region_names|safe }};
+    const roiData = {{ roi_data|safe }};
+    const paybackData = {{ payback_data|safe }};
+    const costData = {{ system_cost_data|safe }};
+  
+    // ROI Chart
+    new Chart(document.getElementById('roiChart'), {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'ROI (%)',
+          data: roiData,
+          backgroundColor: 'rgba(54, 162, 235, 0.7)',
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } }
+      }
+    });
+  
+    // Payback Chart
+    new Chart(document.getElementById('paybackChart'), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Payback Period (years)',
+          data: paybackData,
+          fill: false,
+          borderColor: 'rgba(255, 99, 132, 0.8)',
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true
+      }
+    });
+  
+    // Cost Chart
+    new Chart(document.getElementById('costChart'), {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'System Cost (MMK)',
+          data: costData,
+          backgroundColor: 'rgba(255, 206, 86, 0.7)'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } }
+      }
+    });
+  </script>
+  
+{% endblock %}

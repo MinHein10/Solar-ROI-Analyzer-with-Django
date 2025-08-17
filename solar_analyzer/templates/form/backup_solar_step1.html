@@ -1,0 +1,133 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Solar Input - Step 1</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        .stepper {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .step {
+            text-align: center;
+            flex: 1;
+            position: relative;
+        }
+
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            right: -50%;
+            width: 100%;
+            height: 3px;
+            background-color: #dee2e6;
+            z-index: 0;
+        }
+
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            line-height: 38px;
+            border-radius: 50%;
+            display: inline-block;
+            font-weight: bold;
+            z-index: 1;
+            position: relative;
+        }
+
+        .active-step .step-icon {
+            background-color: #0d6efd;
+            color: white;
+        }
+
+        .inactive-step .step-icon {
+            background-color: #e9ecef;
+            color: #6c757d;
+        }
+
+        .card-choice {
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.3s ease;
+        }
+        .card-choice.selected {
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0,123,255,0.5);
+        }
+    </style>
+</head>
+<body class="bg-light">
+<div class="container py-5 fade-in">
+
+    <!-- Stepper -->
+    <div class="stepper">
+        <div class="step active-step">
+            <div class="step-icon">📍</div>
+            <div>Step 1: Region</div>
+        </div>
+        <div class="step inactive-step">
+            <div class="step-icon">⚙️</div>
+            <div>Step 2: Package</div>
+        </div>
+    </div>
+
+    <h3 class="text-center mb-4">Step 1: Region & Usage</h3>
+
+    <!-- Form Progress Bar -->
+    <div class="progress mb-4" style="height: 25px;">
+        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+             style="width: 50%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+            Step 1 of 2
+        </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="card">
+        <div class="card-body">
+            <form id="step1Form" method="POST" onsubmit="return validateStep1Form();">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div id="step1-error" class="text-danger mb-2"></div>
+                <div class="d-flex justify-content-end mt-3">
+                    <button id="nextBtn" type="submit" class="btn btn-primary">Next ➡️</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JS Validation -->
+<script>
+    function validateStep1Form() {
+        const usageType = document.getElementById("id_usage_type");
+        const region = document.getElementById("id_region");
+        const applianceProfile = document.getElementById("id_appliance_profile");
+        const errorDiv = document.getElementById("step1-error");
+
+        if (!usageType.value || !region.value || !applianceProfile.value) {
+            errorDiv.textContent = "Please fill out all fields before proceeding.";
+            return false;
+        }
+
+        // UX Feedback
+        const button = document.getElementById("nextBtn");
+        button.disabled = true;
+        button.innerHTML = 'Processing... 🔄';
+
+        return true;
+    }
+</script>
+</body>
+</html>

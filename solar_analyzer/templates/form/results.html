@@ -1,0 +1,62 @@
+{% extends 'form/base.html' %}
+{% load static %}
+
+
+{% block title %}Dashboard - Solar ROI Details{% endblock %}
+
+{% block content %}
+
+  <div class="container">
+    <h1 class="text-center mb-4">🔍 Solar ROI Results</h1>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <strong>📥 Input Summary</strong>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>Region:</strong> {{ session.region }}</li>
+                        <li class="list-group-item"><strong>Appliance Profile:</strong> {{ session.appliance_profile }}</li>
+                        <li class="list-group-item"><strong>Installation Package:</strong> {{ session.installation_package }}</li>
+                        <li class="list-group-item"><strong>Incentive Program:</strong> {{ session.incentive_program }}</li>
+                        <li class="list-group-item"><strong>Usage Type:</strong> {{ session.usage_type|title }}</li>
+                        <li class="list-group-item"><strong>Energy Usage:</strong> {{ session.energy_usage }} kWh</li>
+                        <li class="list-group-item"><strong>Electricity Rate:</strong> {{ session.electricity_rate }} MMK/kWh</li>
+                        <li class="list-group-item"><strong>Sunlight Hours:</strong> {{ session.sunlight_hours }} hrs/day</li>
+                        <li class="list-group-item"><strong>System Size:</strong> {{ session.system_size }} kW</li>
+                        <li class="list-group-item"><strong>System Cost:</strong> {{ session.system_cost }} MMK</li>
+                        <li class="list-group-item"><strong>Incentives:</strong> {{ session.incentives }} MMK</li>
+                        <li class="list-group-item"><strong>Lifespan:</strong> {{ session.lifespan }} years</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <strong>📊 Solar ROI Analysis</strong>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>Annual Production:</strong> {{ session.annual_production }} kWh</li>
+                        <li class="list-group-item"><strong>Annual Savings:</strong> {{ session.annual_savings }} MMK</li>
+                        <li class="list-group-item"><strong>Total Savings:</strong> {{ session.total_savings }} MMK</li>
+                        <li class="list-group-item"><strong>Net Cost:</strong> {{ session.net_cost }} MMK</li>
+                        <li class="list-group-item"><strong>Payback Period:</strong> {{ session.payback_period|floatformat:2 }} years</li>
+                        <li class="list-group-item"><strong>ROI:</strong> {{ session.roi_percent|floatformat:2 }}%</li>
+                        <li class="list-group-item"><strong>Cost per kWh (Solar):</strong> {{ session.cost_per_kwh|floatformat:2 }} MMK</li>
+                        <li class="list-group-item"><strong>Total Grid Cost (No Solar):</strong> {{ session.grid_cost|floatformat:2 }} MMK</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <a href="{% url 'index' %}" class="btn btn-secondary">🔙 Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+  </div>
+{% endblock %}
+

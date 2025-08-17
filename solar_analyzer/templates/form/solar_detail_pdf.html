@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Solar ROI PDF Report</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      color: #333;
+      padding: 20px;
+    }
+    h2, h4 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .summary-box {
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    .summary-box h4 {
+      background: #f4f4f4;
+      padding: 10px;
+      margin: -15px -15px 15px -15px;
+      border-bottom: 1px solid #ccc;
+    }
+    .section {
+      margin-bottom: 30px;
+    }
+    .label {
+      font-weight: bold;
+      color: #555;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    td, th {
+      border: 1px solid #999;
+      padding: 8px;
+      text-align: left;
+    }
+    .highlight {
+      background-color: #e8f8f5;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🌞 Solar ROI Detailed Report</h2>
+  <p style="text-align:center;">Generated for <strong>{{ solar_data.user.username }}</strong> | {{ solar_data.created_at|date:"Y-m-d" }}</p>
+
+  <div class="summary-box">
+    <h4>📌 ROI Summary</h4>
+    <p><span class="label">Region:</span> {{ solar_data.region.name }}</p>
+    <p><span class="label">ROI:</span> {{ solar_data.roi_percent|floatformat:2 }}%</p>
+    <p><span class="label">Payback Period:</span> 
+      {% if solar_data.payback_period %}
+        {{ solar_data.payback_period|floatformat:2 }} years
+      {% else %}
+        N/A
+      {% endif %}
+    </p>
+    <p><span class="label">Net Cost:</span> {{ solar_data.net_cost|floatformat:0 }} MMK</p>
+  </div>
+
+  <div class="section">
+    <h4>📥 Input Summary</h4>
+    <table>
+      <tr><td class="label">Region</td><td>{{ solar_data.region.name }}</td></tr>
+      <tr><td class="label">Appliance Profile</td><td>{{ solar_data.appliance_profile.name }}</td></tr>
+      <tr><td class="label">Installation Package</td><td>{{ solar_data.installation_package.name }}</td></tr>
+      <tr><td class="label">Incentive Program</td><td>{{ solar_data.incentive_program.name }}</td></tr>
+      <tr><td class="label">Usage Type</td><td>{{ solar_data.usage_type|title }}</td></tr>
+      <tr><td class="label">Energy Usage</td><td>{{ solar_data.energy_usage }} kWh</td></tr>
+      <tr><td class="label">Electricity Rate</td><td>{{ solar_data.electricity_rate }} MMK/kWh</td></tr>
+      <tr><td class="label">System Size</td><td>{{ solar_data.system_size }} kW</td></tr>
+      <tr><td class="label">Sunlight Hours</td><td>{{ solar_data.sunlight_hours }} hrs/day</td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h4>📊 ROI Calculations</h4>
+    <table>
+      <tr><td class="label">Annual Production</td><td>{{ solar_data.annual_production|floatformat:1 }} kWh</td></tr>
+      <tr><td class="label">Annual Savings</td><td>{{ solar_data.annual_savings|floatformat:0 }} MMK</td></tr>
+      <tr><td class="label">Total Savings</td><td>{{ solar_data.total_savings|floatformat:0 }} MMK</td></tr>
+      <tr><td class="label">Net Cost</td><td>{{ solar_data.net_cost|floatformat:0 }} MMK</td></tr>
+      <tr><td class="label">Cost per kWh (Solar)</td><td>{{ solar_data.cost_per_kwh|floatformat:2 }} MMK</td></tr>
+      <tr><td class="label">Grid Cost without Solar</td><td>{{ solar_data.grid_cost|floatformat:0 }} MMK</td></tr>
+    </table>
+  </div>
+
+  <p style="text-align:center; font-size: 10px; color: #888;">© {{ solar_data.created_at|date:"Y" }} Solar Analyzer. All rights reserved.</p>
+
+</body>
+</html>

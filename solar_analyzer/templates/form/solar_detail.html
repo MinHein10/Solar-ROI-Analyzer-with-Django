@@ -1,0 +1,136 @@
+{% extends 'form/base.html' %}
+{% load static %}
+
+
+{% block title %}Dashboard - Solar ROI Details{% endblock %}
+
+{% block content %}
+
+  <div class="container">
+
+    <div class="container py-5">
+        <h2 class="text-center mb-4">🌞 Solar ROI Detailed Report</h2>
+    
+        <div class="card shadow-sm border-primary">
+            <div class="card-header bg-primary text-white fw-bold">
+                ROI Summary for Region: {{ session.region.name }} | 
+                <small>{{ session.created_at|date:"Y-m-d" }}</small>
+            </div>
+    
+    
+            <!-- KPI Cards Section -->
+            <div class="row mx-4 my-4 text-center">
+                <!-- ROI % Card -->
+                <div class="col-md-4">
+                  <div class="card bg-white border-success shadow-sm rounded-4 p-3">
+                    <h6 class="text-muted">ROI</h6>
+                    <h3 class="text-success">{{ session.roi_percent|default:"0.00"|floatformat:2 }}%</h3>
+                    <div class="progress" style="height: 6px;margin-bottom:15px;">
+                      <div class="progress-bar bg-success" role="progressbar" style="width: {{ session.roi_percent|default:"0" }}%;" aria-valuenow="{{ session.roi_percent|default:"0" }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                  </div>
+                </div>
+              
+                <!-- Net Cost Card -->
+                <div class="col-md-4">
+                  <div class="card bg-white border-primary shadow-sm rounded-4 p-3">
+                    <h6 class="text-muted">Net Cost</h6>
+                    <h3 class="text-primary">{{ session.net_cost|floatformat:0 }} MMK</h3>
+                    <p class="small text-muted mb-0">After incentives</p>
+                  </div>
+                </div>
+              
+                <!-- Payback Period Card -->
+                <div class="col-md-4">
+                  <div class="card bg-white border-warning shadow-sm rounded-4 p-3">
+                    <h6 class="text-muted">Payback</h6>
+                    <h3 class="text-warning">
+                      {% if session.payback_period %}
+                        {{ session.payback_period|floatformat:1 }} yrs
+                      {% else %}
+                        N/A
+                      {% endif %}
+                    </h3>
+                    <p class="small text-muted mb-0">Years to breakeven</p>
+                  </div>
+                </div>
+            </div>      
+
+
+            <div class="card-body row">
+              <div class="col-md-12">
+                <a href="{% url 'download_solar_pdf' %}" class="btn btn-danger my-3">
+                  📥 Download as PDF
+                </a>
+              </div>
+            </div>    
+            <div class="card-body row">
+                <!-- Input Information -->
+                <div class="col-md-6">
+                    <h5 class="text-primary">📥 Input Summary</h5>
+                    <ul class="list-group mb-4">
+                        <li class="list-group-item"><strong>User:</strong> {{ session.user.username|default:"Guest" }}</li>
+                        <li class="list-group-item"><strong>Region:</strong> {{ session.region.name }}</li>
+                        <li class="list-group-item"><strong>Appliance Profile:</strong> {{ session.appliance_profile.name }}</li>
+                        <li class="list-group-item"><strong>Installation Package:</strong> {{ session.installation_package.name }}</li>
+                        <li class="list-group-item"><strong>Incentive Program:</strong> {{ session.incentive_program.name }}</li>
+                        <li class="list-group-item"><strong>Usage Type:</strong> {{ session.usage_type|title }}</li>
+                        <li class="list-group-item"><strong>Energy Usage:</strong> {{ session.energy_usage }} kWh</li>
+                        <li class="list-group-item"><strong>Electricity Rate:</strong> {{ session.electricity_rate }} MMK/kWh</li>
+                        <li class="list-group-item"><strong>System Size:</strong> {{ session.system_size }} kW</li>
+                        <li class="list-group-item"><strong>Sunlight Hours:</strong> {{ session.sunlight_hours }} hrs/day</li>
+                        <li class="list-group-item"><strong>System Cost:</strong> {{ session.system_cost|floatformat:0 }} MMK</li>
+                        <li class="list-group-item"><strong>Incentives:</strong> {{ session.incentives|floatformat:0 }} MMK</li>
+                        <li class="list-group-item"><strong>Lifespan:</strong> {{ session.lifespan }} years</li>
+                    </ul>
+                </div>
+    
+                <!-- ROI Calculations -->
+                <div class="col-md-6">
+                    <h5 class="text-success">📊 ROI Calculation Results</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item"><strong>Annual Production:</strong> {{ session.annual_production|floatformat:1 }} kWh</li>
+                        <li class="list-group-item"><strong>Annual Savings:</strong> {{ session.annual_savings|floatformat:0 }} MMK</li>
+                        <li class="list-group-item"><strong>Total Savings:</strong> {{ session.total_savings|floatformat:0 }} MMK</li>
+                        <li class="list-group-item"><strong>Net Cost:</strong> {{ session.net_cost|floatformat:0 }} MMK</li>
+                        <li class="list-group-item"><strong>Payback Period:</strong> 
+                            {% if session.payback_period %} 
+                                {{ session.payback_period|floatformat:2 }} yrs 
+                            {% else %} 
+                                N/A 
+                            {% endif %}
+                        </li>
+                        <li class="list-group-item"><strong>ROI:</strong> 
+                            {% if session.roi_percent %} 
+                                {{ session.roi_percent|floatformat:2 }} % 
+                            {% else %} 
+                                N/A 
+                            {% endif %}
+                        </li>
+                        <li class="list-group-item"><strong>Cost per kWh (Solar):</strong> 
+                            {% if session.cost_per_kwh %}
+                                {{ session.cost_per_kwh|floatformat:2 }} MMK
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </li>
+                        <li class="list-group-item"><strong>Grid Cost without Solar:</strong> 
+                            {% if session.grid_cost %}
+                                {{ session.grid_cost|floatformat:0 }} MMK
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+        <div class="text-center mt-4">
+            <a href="{% url 'index' %}" class="btn btn-secondary">🔙 Back to Home</a>
+        </div>
+    </div>
+
+  </div>
+{% endblock %}
+

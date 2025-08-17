@@ -1,0 +1,138 @@
+{% extends 'form/base.html' %}
+
+{% block title %}Dashboard - Solar Analyzer{% endblock %}
+
+{% block content %}
+
+  <div class="container py-5">
+
+    <!-- Header -->
+    <div class="text-center mb-5">
+      <h1 class="display-5 fw-bold">☀️ Visualization for All Region Data</h1>
+      <p class="lead">Welcome, <strong>{{ request.user.username }}</strong></p>
+    </div>
+
+    <!-- Map Section -->
+    <h4 class="mb-3">🗺️ Region Map</h4>
+    <div id="regionMap" style="height: 400px;" class="mb-5 shadow-sm rounded-4"></div>
+
+    <!-- Chart Section -->
+    <div class="card shadow-sm p-4 mb-5" style="height: 500px;">
+      <h5 class="text-center mb-3">📈 Region-wise Sunlight Hours & Electricity Rate</h5>
+      <canvas id="regionChart"></canvas>
+    </div>
+
+    <!-- Region Table -->
+    <h4 class="mb-3">📍 Region Details</h4>
+    {% if regions %}
+    <div class="card shadow-sm">
+      <div class="card-body table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+          <thead class="table-dark text-center">
+            <tr>
+              <th>#</th>
+              <th>Region Name</th>
+              <th>Sunlight (hrs/day)</th>
+              <th>Latitude</th>
+              <th>Longitude</th>
+              <th>Electricity Rate (MMK/kWh)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for region in regions %}
+            <tr class="text-center">
+              <td>{{ forloop.counter }}</td>
+              <td>{{ region.name }}</td>
+              <td>{{ region.sunlight_hours }}</td>
+              <td>{{ region.latitude }}</td>
+              <td>{{ region.longitude }}</td>
+              <td>{{ region.electricity_rate }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% else %}
+    <p class="text-muted text-center mt-3">No regions available yet.</p>
+    {% endif %}
+
+
+  </div>
+
+  <!-- JS: Leaflet + Chart.js -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('regionMap').setView([21.0, 96.0], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    {% for region in regions %}
+      L.marker([{{ region.latitude }}, {{ region.longitude }}])
+        .addTo(map)
+        .bindPopup("<b>{{ region.name }}</b><br>☀️ {{ region.sunlight_hours }} hrs/day<br>💡 {{ region.electricity_rate }} MMK/kWh");
+    {% endfor %}
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const ctx = document.getElementById('regionChart').getContext('2d');
+    const regionChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: [{% for region in regions %}"{{ region.name }}"{% if not forloop.last %}, {% endif %}{% endfor %}],
+        datasets: [
+          {
+            label: 'Sunlight Hours',
+            backgroundColor: 'rgba(255, 193, 7, 0.7)',
+            data: [{% for region in regions %}{{ region.sunlight_hours }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+          },
+          {
+            label: 'Electricity Rate',
+            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+            data: [{% for region in regions %}{{ region.electricity_rate }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          tooltip: {
+            mode: 'index',
+            intersect: false
+          },
+          legend: {
+            position: 'top'
+          }
+        },
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
+        scales: {
+          x: {
+            ticks: {
+              autoSkip: false,
+              maxRotation: 45,
+              minRotation: 30,
+              callback: function(value) {
+                let label = this.getLabelForValue(value);
+                return label.length > 15 ? label.slice(0, 15) + '…' : label;
+              }
+            }
+          },
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Values'
+            }
+          }
+        }
+      }
+    });
+  </script>
+{% endblock %}
