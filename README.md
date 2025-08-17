@@ -4,7 +4,9 @@ A web-based Solar Return on Investment (ROI) Analyzer designed to help users in 
 
 ScreenShot
 ----------
-<p align="center"><img src="https://github.com/MinHein10/Inventory-Management-System-in-Laravel/blob/main/inventorysystem2.png" width="400"></p>
+<p align="center"><img src="https://github.com/MinHein10/Solar-ROI-Analyzer-with-Django/blob/main/ROI1.png" width="400"></p>
+<p align="center"><img src="https://github.com/MinHein10/Solar-ROI-Analyzer-with-Django/blob/main/ROI2.png" width="400"></p>
+<p align="center"><img src="https://github.com/MinHein10/Solar-ROI-Analyzer-with-Django/blob/main/ROI3.png" width="400"></p>
 
 -----
 ## 🌟 Key Features
