@@ -2,8 +2,11 @@
 
 A web-based Solar Return on Investment (ROI) Analyzer designed to help users in Myanmar assess the financial benefits of switching to solar energy. The system calculates potential savings, payback periods, break-even points, and supports data specific to local regions and appliance profiles.
 
----
+ScreenShot
+----------
+<p align="center"><img src="https://github.com/MinHein10/Inventory-Management-System-in-Laravel/blob/main/inventorysystem2.png" width="400"></p>
 
+-----
 ## 🌟 Key Features
 
 - 🔄 Multi-step ROI calculation with interactive UI
